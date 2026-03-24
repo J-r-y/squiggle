@@ -1,46 +1,59 @@
 import pygame as pg
 
 from ui.drawable import Drawable
+from util.style import Style
 
 
 class Chat(Drawable):
-    def __init__(self, font: pg.font.Font, x: int, y: int, w: int = 200, h: int = 700):
-        super().__init__(x, y, w, h)
+    def __init__(self, font: pg.font.Font, style: Style = Style()):
+        super().__init__(style)
+
         self.padding = 5
 
-        self.messages = [("Me", "Hello world! What is this game even about")]
+        self.messages = []
 
-        self.font = font
+        self.font = pg.font.Font("Poppins.ttf", 16)
 
     def update(self, e: pg.event.Event): ...
 
-    def add_message(self, name: str, msg: str): ...
+    def add_message(self, name: str, msg: str):
+        self.messages.append((name, msg))
 
     def draw(self, surf: pg.Surface):
         super().draw(surf)
-        for msg in self.messages:
-            surf.blit(self.render_message(*msg), (10, 10))
+        y = self.rect.bottom
+        for i, msg in enumerate(self.messages[::-1]):
+            msg_surf = self.render_message(*msg)
+            y -= msg_surf.get_height() + self.padding
+            surf.blit(msg_surf, (self.rect.x + self.padding, y))
 
     def render_message(self, name: str, msg: str) -> pg.Surface:
         text = f"{name}: {msg}"
-        space = self.rect.w - 10
+        available = self.rect.w - self.padding * 2
         w, h = self.font.size(text)
-        x, y = 5, 5
+        space, _ = self.font.size(" ")
+        x, y = self.padding, self.padding
 
-        surf = pg.Surface((self.rect.w, (w // space + 1) * h + 10), pg.SRCALPHA)
+        surf = pg.Surface(
+            (
+                self.rect.w - self.padding * 2,
+                (w // available + 1) * h + self.padding * 2,
+            ),
+            pg.SRCALPHA,
+        )
         pg.draw.rect(
             surf,
             pg.Color("pink"),
             surf.get_rect(),
-            border_radius=12,
+            border_radius=8,
         )
 
         for w in text.split(" "):
             render = self.font.render(w, True, "black")
-            width = render.get_width() + 5
-            if x + width > space:
+            width = render.get_width() + space
+            if x + width > available:
                 y += h
-                x = 5
+                x = space
             surf.blit(render, (x, y))
             x += width
 

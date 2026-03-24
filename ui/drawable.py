@@ -1,33 +1,44 @@
+from typing import TypeVar
+
 import pygame as pg
+
+from util.style import Style
 
 
 class Drawable:
     def __init__(
         self,
-        x: int,
-        y: int,
-        w: int,
-        h: int,
-        bg: pg.Color | str = pg.Color("white"),
-        border_radius: int = 12,
+        style: Style = Style(),
+        rect: tuple[int, int, int, int] = (0, 0, 0, 0),
     ):
-        self.rect = pg.Rect(x, y, w, h)
-        self.image = pg.Surface((w, h), pg.SRCALPHA)
+        self.style = style
+        self.rect = pg.Rect(*rect)
+        self.image = pg.Surface(self.rect.size, pg.SRCALPHA)
+        self.update_image()
+
+    def update_position(self, *pos):
+        self.rect.topleft = pos
+
+    def update_image(self):
+        self.image = pg.Surface(self.rect.size, pg.SRCALPHA)
         pg.draw.rect(
             self.image,
-            bg,
-            (0, 0, w, h),
-            border_radius=border_radius,
+            self.style["bg"],
+            (0, 0, *self.rect.size),
+            border_radius=self.style["border_radius"],
         )
         pg.draw.rect(
             self.image,
             pg.Color("black"),
-            (0, 0, w, h),
+            (0, 0, *self.rect.size),
             2,
-            border_radius=border_radius,
+            border_radius=self.style["border_radius"],
         )
 
     def update(self, e: pg.event.Event): ...
 
     def draw(self, surf: pg.Surface):
         surf.blit(self.image, self.rect)
+
+
+T = TypeVar("T", bound=Drawable)

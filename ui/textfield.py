@@ -1,7 +1,8 @@
 from typing import Callable
-
 import pygame as pg
+
 from ui.drawable import Drawable
+from util.style import Style
 
 
 class Textfield(Drawable):
@@ -9,12 +10,9 @@ class Textfield(Drawable):
         self,
         callback: Callable,
         font: pg.font.Font,
-        x: int,
-        y: int,
-        w: int = 200,
-        h: int = 40,
+        style: Style = Style(),
     ):
-        super().__init__(x, y, w, h)
+        super().__init__(style)
 
         self.callback = callback
         self.font = font
