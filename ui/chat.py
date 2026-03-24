@@ -21,11 +21,12 @@ class Chat(Drawable):
 
     def draw(self, surf: pg.Surface):
         super().draw(surf)
-        y = self.rect.bottom
+        y = self.rect.height
         for i, msg in enumerate(self.messages[::-1]):
             msg_surf = self.render_message(*msg)
             y -= msg_surf.get_height() + self.padding
-            surf.blit(msg_surf, (self.rect.x + self.padding, y))
+            self.image.blit(msg_surf, (self.padding, y))
+        self.draw_border()
 
     def render_message(self, name: str, msg: str) -> pg.Surface:
         text = f"{name}: {msg}"

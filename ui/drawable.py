@@ -27,6 +27,9 @@ class Drawable:
             (0, 0, *self.rect.size),
             border_radius=self.style["border_radius"],
         )
+        self.draw_border()
+
+    def draw_border(self):
         pg.draw.rect(
             self.image,
             pg.Color("black"),

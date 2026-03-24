@@ -10,12 +10,14 @@ class Textfield(Drawable):
         self,
         callback: Callable,
         font: pg.font.Font,
+        placeholder: str,
         style: Style = Style(),
     ):
         super().__init__(style)
 
         self.callback = callback
         self.font = font
+        self.placeholder = placeholder
         self.active = False
         self.text = ""
 
@@ -50,7 +52,7 @@ class Textfield(Drawable):
     def draw(self, surf: pg.Surface, dt: int = 1000 // 60):
         super().draw(surf)
         render = self.font.render(
-            self.text if len(self.text) else "Guess...", True, "black"
+            self.text if len(self.text) else self.placeholder, True, "black"
         )
         x = self.rect.x + 5
         if render.get_width() > self.rect.width - 10:

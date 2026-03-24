@@ -27,14 +27,22 @@ class Game:
         self.palette = Palette(Style(height=0.1))
         self.canvas = Canvas(self.palette, self.send_bytes)
         self.chat = Chat(self.font)
-        self.textfield = Textfield(self.send_message, self.font, Style(height=0.1))
-
-        self.pre_view = Flexbox(
-            (Textfield(self.send_message, self.font, Style(width=200, height=100)),),
-            (100, 100, 200, 200),
+        self.textfield = Textfield(
+            self.send_message, self.font, "Guess...", Style(height=0.1)
         )
-        self.pre_view.set_sizes(self.pre_view.get_space())
-        self.pre_view.set_positions()
+
+        self.lobby = Flexbox(
+            (
+                Textfield(
+                    self.join_lobby,
+                    self.font,
+                    "Your Name...",
+                    Style(width=200, height=50),
+                ),
+            ),
+            (100, 100, 200, 50),
+        )
+        self.lobby.setup()
         self.game_view = Flexbox(
             (
                 self.menu,
@@ -46,9 +54,10 @@ class Game:
             ),
             (140, 110, 1000, 500),
         )
+        self.game_view.setup()
 
-        self.game_view.set_sizes(self.game_view.get_space())
-        self.game_view.set_positions()
+        self.views = {"lobby": self.lobby, "game": self.game_view}
+        self.current_view = "lobby"
 
         self.name: str = ""
 
@@ -71,11 +80,11 @@ class Game:
             if e.type == pg.QUIT:
                 self.running = False
 
-            self.pre_view.update(e)
+            self.views[self.current_view].update(e)
 
     def render(self):
         self.screen.fill(pg.Color("cyan"))
-        self.pre_view.draw(self.screen)
+        self.views[self.current_view].draw(self.screen)
 
         pg.display.update()
 
@@ -90,6 +99,8 @@ class Game:
                         self.chat.add_message(data["name"], data["msg"])
                     case "canvas":
                         self.canvas.draw_circle(*data["event"])
+                    case "join":
+                        self.chat.add_message(data["name"], " joined the lobby!")
 
         except Exception as e:
             print(f"Error in client: {e}")
@@ -100,6 +111,12 @@ class Game:
     def send_message(self, message: str):
         data = json.dumps({"type": "msg", "name": self.name, "msg": message}).encode()
         self.chat.add_message(self.name, message)
+        self.send_bytes(data)
+
+    def join_lobby(self, name: str):
+        self.name = name
+        self.current_view = "game"
+        data = json.dumps({"type": "join", "name": name}).encode()
         self.send_bytes(data)
 
     def send_bytes(self, data: bytes):

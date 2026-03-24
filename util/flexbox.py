@@ -22,6 +22,14 @@ class Flexbox:
             self.grid.append(item)
         self.set_positions()
 
+    def setup(self):
+        self.center((1280, 720))
+        self.set_sizes()
+        self.set_positions()
+
+    def center(self, space: tuple[int, int]):
+        self.rect.center = (space[0] // 2, space[1] // 2)
+
     def get_space(self) -> tuple[int, int]:
         return (
             self.rect.width - (len(self.grid) - 1) * self.gap,
@@ -47,7 +55,7 @@ class Flexbox:
                 else:
                     y += item.rect.height + self.gap
 
-    def set_sizes(self, size: tuple[int, int]):
+    def set_sizes(self):
         widths = []
         heights = []
         for item in self.grid:
@@ -55,10 +63,10 @@ class Flexbox:
             h = 0
             if isinstance(item, Flexbox):
                 if item.style["width"]:
-                    w = int(size[0] * item.style["width"])
+                    w = int(self.rect.width * item.style["width"])
                     item.rect.width = w
                 if item.style["height"]:
-                    h = int(size[1] * item.style["height"])
+                    h = int(self.rect.height * item.style["height"])
                     item.rect.height = h
             elif hasattr(item, "style") and not isinstance(item, Flexbox):
                 if item.style["width"]:
@@ -107,17 +115,15 @@ class Flexbox:
                 sum([h if h else part_height for h in heights]),
             )
 
-        print(self.filled_space, self.rect.size)
         for item in self.grid:
             if item.rect.width == 0:
                 item.rect.width = part_width
             if item.rect.height == 0:
                 item.rect.height = part_height
             if isinstance(item, Flexbox):
-                item.set_sizes(self.get_space())
+                item.set_sizes()
             else:
                 item.update_image()
-        return widths
 
     def iterate(self, func_name: str, args: tuple = ()):
         for item in self.grid:
